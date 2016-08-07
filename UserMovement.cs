@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
 
 public class UserMovement : MonoBehaviour {
 	
@@ -16,14 +15,14 @@ public class UserMovement : MonoBehaviour {
 	private Vector3 moveDirection = Vector3.zero;
 	private bool isWalking;
 	private string moveStatus = "idle";
-	
-	public GameObject camera1;
+
+    public UserCamera usercamera;
+    public GameObject camera1;
 	public CharacterController controller;
 	public bool isJumping;
 	private float myAng = 0.0f;
 	public bool canJump = true;
 	
-
 	void Start () {
 		
 		controller = GetComponent<CharacterController>();
@@ -54,13 +53,18 @@ public class UserMovement : MonoBehaviour {
 			moveDirection *= isWalking ? walkSpeed : runSpeed;
 			
 			moveStatus = "idle";
-			
-			
-			
-			if(moveDirection != Vector3.zero)
-				moveStatus = isWalking ? "walking" : "running";
-			
-			if (Input.GetKeyDown(KeyCode.Space) && canJump) {		
+
+
+
+            if (moveDirection != Vector3.zero)
+            {
+                moveStatus = isWalking ? "walking" : "running";
+                usercamera.setFollowing();
+                //print(moveStatus);
+            }
+
+
+            if (Input.GetKeyDown(KeyCode.Space) && canJump) {		
 				moveDirection.y = jumpSpeed;
 				isJumping = true;
 			}
@@ -70,14 +74,10 @@ public class UserMovement : MonoBehaviour {
 		
 		// Allow turning at anytime. Keep the character facing in the same direction as the Camera if the right mouse button is down.
 		
-		if(camera1.transform.gameObject.transform.GetComponent<UserCamera>().inFirstPerson == false) {
-			if(Input.GetMouseButton(1)) {
-				transform.rotation = Quaternion.Euler(0,Camera.main.transform.eulerAngles.y,0);
-			} else {
-				transform.Rotate(0,Input.GetAxis("Horizontal") * rotateSpeed * Time.deltaTime, 0);
-				
-			}
-		}
+		if(camera1.transform.gameObject.transform.GetComponent<UserCamera>().inFirstPerson == false) {		
+			transform.Rotate(0,Input.GetAxis("Horizontal") * rotateSpeed * Time.deltaTime, 0);
+            
+        }
 		else {
 			if(Input.GetMouseButton(0) || Input.GetMouseButton(1)) {
 				transform.rotation = Quaternion.Euler(0,Camera.main.transform.eulerAngles.y,0);
@@ -96,7 +96,8 @@ public class UserMovement : MonoBehaviour {
 		}
 		else {
 			flags = controller.Move((moveDirection + new Vector3(0,-100,0)) * Time.deltaTime);
-		}
+            
+        }
 		
 		grounded = (flags & CollisionFlags.Below) != 0;
 		
@@ -106,5 +107,4 @@ public class UserMovement : MonoBehaviour {
 		
 		myAng = Vector3.Angle(Vector3.up, hit.normal); 
 	}
-	
 }
