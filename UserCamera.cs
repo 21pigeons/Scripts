@@ -18,7 +18,7 @@ public class UserCamera : MonoBehaviour {
     public float rotationDampening = 3.0f; 				// Auto Rotation speed (higher = faster)
 	public float zoomDampening = 5.0f; 					// Auto Zoom speed (Higher = faster)
     public float followCamXangle = 30f;                  // Auto Zoom speed (Higher = faster)
-    LayerMask collisionLayers = -1;		// What the camera will collide with
+    public LayerMask DoesNotCollideWith = -1;		// What the camera will collide with
 
 	
 	public bool lockToRearOfTarget;				
@@ -54,7 +54,8 @@ public class UserCamera : MonoBehaviour {
 		
 		if (lockToRearOfTarget)
 			rotateBehind = true;
-	} 
+        
+    } 
 	
 	void Update () {
         if (inFirstPerson)
@@ -102,7 +103,7 @@ public class UserCamera : MonoBehaviour {
                     //Check to see if mouse input is allowed on the axis
                     if ((allowMouseInputX || allowMouseInputY) && Following)
                     {
-                        print("Changing following to false");
+                        //print("Changing following to false");
                         Following = false;
                         movingintopos = false;
                         yDeg = transform.rotation.eulerAngles.x;
@@ -131,10 +132,10 @@ public class UserCamera : MonoBehaviour {
             if (movingintopos){
                 
                 float f = Vector3.Dot(ActualRpt, SetRot);
-                print("f,setRot,Actualrot [" + f + "," + SetRot.ToString() + "," + ActualRpt.ToString() + "]");
+                //print("f,setRot,Actualrot [" + f + "," + SetRot.ToString() + "," + ActualRpt.ToString() + "]");
                 if (f < 398)
                 {
-                    print("Snapped Back");
+                    //print("Snapped Back");
                     movingintopos = false;
                 }
                 else
@@ -147,7 +148,7 @@ public class UserCamera : MonoBehaviour {
                     float ydeg = Mathf.DeltaAngle(SetRot.y,ActualRpt.y)* -1 * Time.deltaTime * SnapBackRate;
                     float zdeg = Mathf.DeltaAngle(SetRot.z,ActualRpt.z)* -1 * Time.deltaTime * SnapBackRate;
                     
-                    print("x,y,z[" + xdeg + "," + ydeg + "," + zdeg + "]");
+                    //print("x,y,z[" + xdeg + "," + ydeg + "," + zdeg + "]");
 
 
                     rotation = Quaternion.Euler(ActualRpt.x + xdeg, ActualRpt.y + ydeg, ActualRpt.z + zdeg);
@@ -178,15 +179,17 @@ public class UserCamera : MonoBehaviour {
 		Vector3 trueTargetPosition = new Vector3 (target.position.x, target.position.y + targetHeight, target.position.z); 
 		
 		// If there was a collision, correct the camera position and calculate the corrected distance 
-		bool isCorrected = false; 
-        /*
-		if (Physics.Linecast (trueTargetPosition, position,out collisionHit, collisionLayers)) 
+		bool isCorrected = false;
+
+        
+        LayerMask collisionLayers = ~(DoesNotCollideWith.value);
+
+        if (Physics.Linecast (trueTargetPosition, position,out collisionHit, collisionLayers)) 
 		{ 
 			correctedDistance = Vector3.Distance (trueTargetPosition, collisionHit.point) - offsetFromWall; 
 			isCorrected = true;
 		}
-        */
-		
+               
 		// For smoothing, lerp distance only if either distance wasn't corrected, or correctedDistance is more than currentDistance 
 		currentDistance = !isCorrected || correctedDistance > currentDistance ? Mathf.Lerp (currentDistance, correctedDistance, Time.deltaTime * zoomDampening) : correctedDistance; 
 		
@@ -214,7 +217,7 @@ public class UserCamera : MonoBehaviour {
     public void setFollowing()
     {
         if (!Following && !Input.GetMouseButton(0)) {
-            print("Following behind, Trying to snap back");
+            //print("Following behind, Trying to snap back");
             Following = true;
             movingintopos = true;
         }
