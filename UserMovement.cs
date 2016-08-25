@@ -24,7 +24,6 @@ public class UserMovement : MonoBehaviour {
 	public bool canJump = true;
 	
 	void Start () {
-		
 		controller = GetComponent<CharacterController>();
 	}
 	

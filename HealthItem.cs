@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class UseItem : MonoBehaviour {
+public class HealthItem : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
@@ -10,6 +10,6 @@ public class UseItem : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        gameObject.active = false;
-    }
+	
+	}
 }
