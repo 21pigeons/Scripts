@@ -2,47 +2,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using UnityEngine.UI;
 
 public class UserInventory : MonoBehaviour {
-    public GUISkin InvSkin;
-    private bool InvOpen;
+    public Texture2D RedMushroom, GreenMushroom, BlueMushroom,Potion;
+    private CraftingUIManager craftingUIManager;
+    
+    private bool InvOpen = false;
     private List<GameObject> nearbyItems = new List<GameObject>();
-    private List<Item> items = new List<Item>();
+    private List<Item> items = new List<Item>(13);
     private Dictionary<string, Item> itemPresets = new Dictionary<string, Item>();
+    public GameObject DisplayText;
     public GameObject CraftingUI;
-    public Texture2D defaultitem;
-
 
     void OnGUI() {
         if (InvOpen)
         {
-            GUI.skin = InvSkin;
-            DrawInventory();
-        }
-    }
-
-    private void DrawInventory(){       
-        for (int i = 0;i<2;i++) {
-            for (int j = 0; j < 5; j++) {
-                RectTransform Crafting = ((RectTransform)CraftingUI.GetComponent("RectTransform"));
-                RectTransform ItemArea = ((RectTransform)(CraftingUI.transform.Find("ItemSlot").GetComponent("RectTransform")));
-                Vector2 ItemXY = ItemArea.anchoredPosition;
-                Vector2 V2 = Crafting.anchoredPosition;
-                int XSize = (int)(0.45 * (ItemArea.rect.x*-1));
-                int YSize = (int)(0.18 * (ItemArea.rect.y)*-1);
-                int Xspacing = (int)(0.1 * (ItemArea.rect.x)*-1);
-                int Yspaceing = (int)(0.0375 * (ItemArea.rect.y)*1);
-                //print("x,y:"+ ItemArea.rect.x + ","+ ItemArea.rect.y);
-                Rect slotRect = new Rect(V2.x+ ItemXY.x + (i * (XSize+ Xspacing))+557, ((V2.y+ ItemXY.y) *-1) +(j * (XSize + Xspacing)), XSize, YSize);
-                GUI.Box(slotRect, "", InvSkin.GetStyle("Slot"));
-                if (items.Count > (i * 5) + j){
-                    Item item = items[(i * 5) + j];
-                    if (item != null)   
-                    {
-                        GUI.DrawTexture(slotRect, item.itemIcon);
-                    }
-                }                
-            }
+            craftingUIManager.updateItems(items);
         }
     }
 
@@ -55,51 +31,69 @@ public class UserInventory : MonoBehaviour {
             AddNew(name);
             item.SetActive(false);
             nearbyItems.Remove(item);
-
+            UpdateBottemText("");
         }
             if (Input.GetKeyDown(KeyCode.Tab))
         {
             InvOpen = !InvOpen;
             CraftingUI.SetActive(InvOpen);
             if (InvOpen){
-                PrintItemsInInv();
-               
+                PrintItemsInInv();               
             }
         }
     }
 
     public void PrintItemsInInv()
     {
-        foreach (Item item in items) { item.PrintInfo(); }
+        foreach (Item item in items) {
+            if (item != null) {
+                item.PrintInfo();
+            }
+        }
+    }
+
+    public void addPotion() {
+        AddNew("PurePotion");
     }
 
     public Item AddNew(string name)
     {
         Item preset = itemPresets[name]; // Get the preset
+        if (preset.stackable == true) {
+            foreach (Item item in items) {
+                if (item != null) {
+                    if (item.Name.Equals(preset.Name)) {
+                        item.Amount = item.Amount + 1;
+                        return item;
+                    }
+                }
+            }
+        }
         Item newItem = new Item(preset); // Create a clone,                        
-        items.Add(newItem);              // Register to database
+        AddItem(newItem);              // Register to database
         return newItem;                  // And return it since you want to use it right now
     }
 
-    private void PopulateItems()
-    {
-        Item preset;
-        preset = new Item();
-        preset.Name = "RedHealth";
-        preset.HealAmount = 25;
-        preset.weight = 1;
-        preset.itemIcon = defaultitem;
-        SetPreset("RedHealth", preset);
+    private void AddItem(Item newItem) {
+        for(int i = 0; i < items.Count; i++) {
+            if(items[i] == null){
+                items[i] = newItem;
+                return;
+            }
+        }
     }
 
     public void addnearby(GameObject go)
     {
         nearbyItems.Add(go);
+        String name = ((GroundItem)go.GetComponent("GroundItem")).ItemName;
+        UpdateBottemText("Press \"e\" to pickup "+name);
     }
 
     public void removenearby(GameObject go)
     {
         nearbyItems.Remove(go);
+        UpdateBottemText("");
     }
 
     public void SetPreset(string name, Item preset)
@@ -110,8 +104,47 @@ public class UserInventory : MonoBehaviour {
 
     void Start()
     {
+        craftingUIManager = (CraftingUIManager)CraftingUI.GetComponent("CraftingUIManager");
         PopulateItems();
         CraftingUI.SetActive(false);
+        for(int i = 0; i < 13; i++) {
+            items.Add(null);
+        }
     }
 
+    public void UpdateBottemText(string text) {
+        DisplayText.SetActive(true);
+        (DisplayText.GetComponent<Text>()).text = text;
+    }
+
+    private void PopulateItems() {
+        Item preset;
+        preset = new Item();
+        preset.Name = "RedMushroom";
+        preset.HealAmount = 25;
+        preset.stackable = true;
+        preset.itemIcon = RedMushroom;
+        SetPreset("RedMushroom", preset);
+
+        preset = new Item();
+        preset.Name = "GreenMushroom";
+        preset.HealAmount = -20;
+        preset.stackable = true;
+        preset.itemIcon = GreenMushroom;
+        SetPreset("GreenMushroom", preset);
+
+        preset = new Item();
+        preset.Name = "BlueMushroom ";
+        preset.HealAmount = 0;
+        preset.stackable = true;
+        preset.itemIcon = BlueMushroom;
+        SetPreset("BlueMushroom", preset);
+
+        preset = new Item();
+        preset.Name = "PurePotion ";
+        preset.HealAmount = 0;
+        preset.stackable = true;
+        preset.itemIcon = Potion;
+        SetPreset("PurePotion", preset);
+    }
 }
