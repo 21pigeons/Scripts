@@ -20,13 +20,11 @@ public class GroundItem : MonoBehaviour {
 
         if (WithinPickup){
             if (distance > MaxPickUpdistance+5) {
-                print("You ran away :(");
                 WithinPickup = false;
                 UsrInv.removenearby(this.gameObject);
             }
         }else{
             if (distance < MaxPickUpdistance)  {
-                print("PICK ME UP MOTHERFUCKER");
                 WithinPickup = true;
                 UsrInv.addnearby(this.gameObject);
             }

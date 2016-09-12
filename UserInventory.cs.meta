@@ -1,10 +1,16 @@
 fileFormatVersion: 2
 guid: b2208f9b794a56341834cab21ccc4607
-timeCreated: 1471996189
+timeCreated: 1472167651
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - RedMushroom: {fileID: 2800000, guid: fed9325f344f8204e968e0e20398fb08, type: 3}
+  - GreenMushroom: {fileID: 2800000, guid: a21fbee0b3655124881f6b37525b298f, type: 3}
+  - WhiteMushroom: {instanceID: 0}
+  - Potion: {instanceID: 0}
+  - DisplayText: {instanceID: 0}
+  - CraftingUI: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

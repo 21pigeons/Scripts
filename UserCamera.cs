@@ -29,18 +29,20 @@ public class UserCamera : MonoBehaviour {
 	private float yDeg = 0.0f; 
 	private float currentDistance; 
 	public float desiredDistance; 
-	private float correctedDistance; 
-	private bool rotateBehind;
-    private bool movingintopos;
+	private float correctedDistance;
+    private bool rotateBehind = true;
+    private bool movingintopos = false;
+    private bool Following = true;
     private Quaternion rotation;
 
     public GameObject userModel;
 	public bool inFirstPerson;
-    public bool Following;
+    
 
 
     void Start () {
-        
+        target.rotation = transform.rotation;
+
         Vector3 angles = transform.eulerAngles; 
 		xDeg = angles.x; 
 		yDeg = angles.y; 
@@ -91,15 +93,16 @@ public class UserCamera : MonoBehaviour {
 			return;
 		
 		Vector3 vTargetOffset3;
-		
+        
 		// If either mouse buttons are down, let the mouse govern camera position 
 		if (GUIUtility.hotControl == 0)
 		{
 			if(Input.GetKey(KeyCode.LeftControl)) {
 				
 			}else {
-				//if (Input.GetMouseButton(0) || Input.GetMouseButton(1))
-                if (Input.GetMouseButton(0)) {
+                //if (Input.GetMouseButton(0) || Input.GetMouseButton(1))
+                bool temp = ((UserInventory)target.transform.GetComponent("UserInventory")).InvOpen;
+                if (Input.GetMouseButton(0) && !temp) {
                     //Check to see if mouse input is allowed on the axis
                     if ((allowMouseInputX || allowMouseInputY) && Following)
                     {
@@ -120,20 +123,17 @@ public class UserCamera : MonoBehaviour {
 		}
 		ClampAngle (yDeg);
 
-        
         if (Following){
-
-
-
             // Set camera rotation to follow player
             Vector3 SetRot = new Vector3(followCamXangle, target.eulerAngles.y, target.eulerAngles.z);
             Vector3 ActualRpt = rotation.eulerAngles;
 
             if (movingintopos){
                 
-                float f = Vector3.Dot(ActualRpt, SetRot);
+                float f = Vector3.Distance(ActualRpt, SetRot);
                 //print("f,setRot,Actualrot [" + f + "," + SetRot.ToString() + "," + ActualRpt.ToString() + "]");
-                if (f < 398)
+
+                if (f < 1)
                 {
                     //print("Snapped Back");
                     movingintopos = false;
@@ -147,11 +147,20 @@ public class UserCamera : MonoBehaviour {
                     float xdeg = Mathf.DeltaAngle(SetRot.x,ActualRpt.x)* -1 * Time.deltaTime * SnapBackRate;
                     float ydeg = Mathf.DeltaAngle(SetRot.y,ActualRpt.y)* -1 * Time.deltaTime * SnapBackRate;
                     float zdeg = Mathf.DeltaAngle(SetRot.z,ActualRpt.z)* -1 * Time.deltaTime * SnapBackRate;
-                    
+
+                    float minspeed = 0.7f;
+
+                    if (Mathf.Abs(ydeg) < minspeed) {
+                        if (ydeg > 0) {
+                            ydeg = minspeed;
+                        }else{
+                            ydeg = -minspeed;
+                        }
+                    }
                     //print("x,y,z[" + xdeg + "," + ydeg + "," + zdeg + "]");
 
-
-                    rotation = Quaternion.Euler(ActualRpt.x + xdeg, ActualRpt.y + ydeg, ActualRpt.z + zdeg);
+                    target.rotation = Quaternion.Euler(target.eulerAngles.x, target.eulerAngles.y - ydeg, target.eulerAngles.z);
+                    rotation = Quaternion.Euler(ActualRpt.x + xdeg, ActualRpt.y, ActualRpt.z + zdeg);
                 }
             }else{
                 rotation = Quaternion.Euler(SetRot);
