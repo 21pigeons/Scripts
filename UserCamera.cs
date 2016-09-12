@@ -95,7 +95,7 @@ public class UserCamera : MonoBehaviour {
 		Vector3 vTargetOffset3;
         
 		// If either mouse buttons are down, let the mouse govern camera position 
-		if (GUIUtility.hotControl == 0)
+		if (GUIUtility.hotControl == 0 && false)
 		{
 			if(Input.GetKey(KeyCode.LeftControl)) {
 				
